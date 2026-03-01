@@ -1,0 +1,180 @@
+{
+  "info": {
+    "_postman_id": "87654321-4321-4321-4321-210987654321",
+    "name": "Mortgage Service - Loan API",
+    "description": "Collection for Loan Management endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Create Loan",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"loanAmount\": 300000,\n  \"interestRate\": 6.5,\n  \"loanType\": \"FIXED\",\n  \"termMonths\": 360,\n  \"startDate\": \"2024-03-01\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/v1/loans/customer/{{customerId}}",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "loans",
+            "customer",
+            "{{customerId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get All Loans",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/v1/loans",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "loans"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get Loan By ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/v1/loans/{{loanId}}",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "loans",
+            "{{loanId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get Loans By Customer ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/v1/loans/customer/{{customerId}}",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "loans",
+            "customer",
+            "{{customerId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get Total Outstanding Balance",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/v1/loans/customer/{{customerId}}/balance",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "loans",
+            "customer",
+            "{{customerId}}",
+            "balance"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Update Loan Status",
+      "request": {
+        "method": "PATCH",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/v1/loans/{{loanId}}/status?status=CLOSED",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "loans",
+            "{{loanId}}",
+            "status"
+          ],
+          "query": [
+            {
+              "key": "status",
+              "value": "CLOSED"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Delete Loan",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/v1/loans/{{loanId}}",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "loans",
+            "{{loanId}}"
+          ]
+        }
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "customerId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "loanId",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}
