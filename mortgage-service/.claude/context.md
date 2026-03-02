@@ -19,26 +19,33 @@ src/main/java/com/mortgage/mortgage_service/
 │   └── SecurityConfig.java          ← open, all permitted for now
 ├── controller/
 │   ├── CustomerController.java      ← /api/v1/customers
-│   └── LoanController.java          ← /api/v1/loans
+│   ├── LoanController.java          ← /api/v1/loans
+│   └── PaymentController.java       ← /api/v1/payments
 ├── service/
 │   ├── CustomerService.java         ← interface
 │   ├── LoanService.java             ← interface
+│   ├── PaymentService.java          ← interface
 │   └── impl/
 │       ├── CustomerServiceImpl.java ← business logic
-│       └── LoanServiceImpl.java     ← business logic
+│       ├── LoanServiceImpl.java     ← business logic
+│       └── PaymentServiceImpl.java  ← business logic
 ├── repository/
 │   ├── CustomerRepository.java
-│   └── LoanRepository.java
+│   ├── LoanRepository.java
+│   └── PaymentRepository.java
 ├── entity/
 │   ├── Customer.java                ← UUID PK, OneToMany Loans
-│   └── Loan.java                    ← UUID PK, ManyToOne Customer
+│   ├── Loan.java                    ← UUID PK, ManyToOne Customer
+│   └── Payment.java                 ← UUID PK, ManyToOne Loan
 ├── dto/
 │   ├── request/
 │   │   ├── CustomerRequest.java
-│   │   └── LoanRequest.java
+│   │   ├── LoanRequest.java
+│   │   └── PaymentRequest.java
 │   └── response/
 │       ├── CustomerResponse.java
-│       └── LoanResponse.java
+│       ├── LoanResponse.java
+│       └── PaymentResponse.java
 ├── exception/
 │   ├── ResourceNotFoundException.java
 │   ├── DuplicateResourceException.java
