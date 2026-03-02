@@ -11,7 +11,13 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "loans")
+@Table(
+        name = "loans",
+        indexes = {
+                @Index(name = "idx_loans_customer_id", columnList = "customer_id"),
+                @Index(name = "idx_loans_status",      columnList = "status")
+        }
+)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -60,8 +66,14 @@ public class Loan {
     private LocalDateTime updatedAt;
 
     // Many loans belong to one customer
+    // FetchType.LAZY — customer is NOT loaded unless explicitly accessed (avoids N+1)
+    // ForeignKey name — makes the DB constraint identifiable in logs/migrations
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "customer_id", nullable = false)
+    @JoinColumn(
+            name = "customer_id",
+            nullable = false,
+            foreignKey = @ForeignKey(name = "fk_loans_customer_id")
+    )
     private Customer customer;
 
     public enum LoanType {
@@ -69,6 +81,6 @@ public class Loan {
     }
 
     public enum LoanStatus {
-        PENDING, ACTIVE, CLOSED, DEFAULT, FORECLOSURE
+        PENDING, ACTIVE, CLOSED, DEFAULT, FORECLOSURE, DEFAULTED
     }
 }

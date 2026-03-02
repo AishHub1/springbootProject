@@ -1,0 +1,831 @@
+{
+  "info": {
+    "name": "Mortgage Service — Day 2",
+    "description": "Complete test flow for Day 2 — JPA, Pagination, Queries",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "customer1Id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "customer2Id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "loan1Id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "loan2Id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "loan3Id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "loan4Id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "loan5Id",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Step 1 — Create Customers",
+      "item": [
+        {
+          "name": "Create Customer 1 (John Smith)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.collectionVariables.set('customer1Id', json.customerId);",
+                  "console.log('Customer 1 ID:', json.customerId);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Smith\",\n  \"email\": \"john.smith@example.com\",\n  \"phone\": \"8005550101\",\n  \"address\": \"123 Main St, New York, NY\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/customers",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "customers"]
+            }
+          }
+        },
+        {
+          "name": "Create Customer 2 (Sarah Johnson)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.collectionVariables.set('customer2Id', json.customerId);",
+                  "console.log('Customer 2 ID:', json.customerId);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Sarah\",\n  \"lastName\": \"Johnson\",\n  \"email\": \"sarah.johnson@example.com\",\n  \"phone\": \"8005550202\",\n  \"address\": \"456 Oak Ave, Chicago, IL\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/customers",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "customers"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Step 2 — Create Loans",
+      "item": [
+        {
+          "name": "Loan 1 — Customer 1 FIXED 450k",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.collectionVariables.set('loan1Id', json.loanId);",
+                  "console.log('Loan 1 ID:', json.loanId);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"loanAmount\": 450000.00,\n  \"interestRate\": 6.75,\n  \"loanType\": \"FIXED\",\n  \"termMonths\": 360,\n  \"startDate\": \"2026-03-02\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/loans/customer/{{customer1Id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "loans", "customer", "{{customer1Id}}"]
+            }
+          }
+        },
+        {
+          "name": "Loan 2 — Customer 1 FHA 200k",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.collectionVariables.set('loan2Id', json.loanId);",
+                  "console.log('Loan 2 ID:', json.loanId);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"loanAmount\": 200000.00,\n  \"interestRate\": 5.50,\n  \"loanType\": \"FHA\",\n  \"termMonths\": 240,\n  \"startDate\": \"2026-03-02\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/loans/customer/{{customer1Id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "loans", "customer", "{{customer1Id}}"]
+            }
+          }
+        },
+        {
+          "name": "Loan 3 — Customer 1 JUMBO 900k",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.collectionVariables.set('loan3Id', json.loanId);",
+                  "console.log('Loan 3 ID:', json.loanId);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"loanAmount\": 900000.00,\n  \"interestRate\": 7.25,\n  \"loanType\": \"JUMBO\",\n  \"termMonths\": 360,\n  \"startDate\": \"2026-03-02\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/loans/customer/{{customer1Id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "loans", "customer", "{{customer1Id}}"]
+            }
+          }
+        },
+        {
+          "name": "Loan 4 — Customer 2 VA 320k",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.collectionVariables.set('loan4Id', json.loanId);",
+                  "console.log('Loan 4 ID:', json.loanId);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"loanAmount\": 320000.00,\n  \"interestRate\": 5.00,\n  \"loanType\": \"VA\",\n  \"termMonths\": 360,\n  \"startDate\": \"2026-03-02\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/loans/customer/{{customer2Id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "loans", "customer", "{{customer2Id}}"]
+            }
+          }
+        },
+        {
+          "name": "Loan 5 — Customer 2 ARM 175k",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.collectionVariables.set('loan5Id', json.loanId);",
+                  "console.log('Loan 5 ID:', json.loanId);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"loanAmount\": 175000.00,\n  \"interestRate\": 4.75,\n  \"loanType\": \"ARM\",\n  \"termMonths\": 180,\n  \"startDate\": \"2026-03-02\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/loans/customer/{{customer2Id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "loans", "customer", "{{customer2Id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Step 3 — Pagination",
+      "item": [
+        {
+          "name": "All Customers — Page 0 Size 5 Sort lastName ASC",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/customers?page=0&size=5&sortBy=lastName&direction=asc",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "customers"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "5" },
+                { "key": "sortBy", "value": "lastName" },
+                { "key": "direction", "value": "asc" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "All Customers — Page 1 Size 1",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/customers?page=1&size=1&sortBy=lastName&direction=asc",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "customers"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "size", "value": "1" },
+                { "key": "sortBy", "value": "lastName" },
+                { "key": "direction", "value": "asc" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "All Loans — Sort by Amount DESC",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/loans?page=0&size=10&sortBy=loanAmount&direction=desc",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "loans"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "10" },
+                { "key": "sortBy", "value": "loanAmount" },
+                { "key": "direction", "value": "desc" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Loans by Customer 1 — Page 0 Size 2",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/loans/customer/{{customer1Id}}?page=0&size=2",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "loans", "customer", "{{customer1Id}}"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "2" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Loans by Customer 1 — Page 1 Size 2 (last page)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/loans/customer/{{customer1Id}}?page=1&size=2",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "loans", "customer", "{{customer1Id}}"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "size", "value": "2" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Loans by Status — ACTIVE",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/loans/status/ACTIVE?page=0&size=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "loans", "status", "ACTIVE"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "10" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Step 4 — Search",
+      "item": [
+        {
+          "name": "Search by First Name — john",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/customers/search?name=john&page=0&size=5",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "customers", "search"],
+              "query": [
+                { "key": "name", "value": "john" },
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "5" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Search by Last Name — johnson",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/customers/search?name=johnson&page=0&size=5",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "customers", "search"],
+              "query": [
+                { "key": "name", "value": "johnson" },
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "5" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Search Partial Match — son",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/customers/search?name=son&page=0&size=5",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "customers", "search"],
+              "query": [
+                { "key": "name", "value": "son" },
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "5" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Search No Results — xyz",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/customers/search?name=xyz&page=0&size=5",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "customers", "search"],
+              "query": [
+                { "key": "name", "value": "xyz" },
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "5" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Step 5 — Customer With Loans (JOIN FETCH)",
+      "item": [
+        {
+          "name": "Customer 1 With Loans",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/customers/{{customer1Id}}/loans",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "customers", "{{customer1Id}}", "loans"]
+            }
+          }
+        },
+        {
+          "name": "Customer 2 With Loans",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/customers/{{customer2Id}}/loans",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "customers", "{{customer2Id}}", "loans"]
+            }
+          }
+        },
+        {
+          "name": "Customer 1 Plain GET (loans should be null)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/customers/{{customer1Id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "customers", "{{customer1Id}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Loan By ID (JOIN FETCH with customer)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/loans/{{loan1Id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "loans", "{{loan1Id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Step 6 — Summary and Stats",
+      "item": [
+        {
+          "name": "Loan Summary by Status",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/loans/summary",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "loans", "summary"]
+            }
+          }
+        },
+        {
+          "name": "Top 3 Loans by Amount",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/loans/top?n=3",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "loans", "top"],
+              "query": [
+                { "key": "n", "value": "3" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Top 5 Loans by Amount",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/loans/top?n=5",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "loans", "top"],
+              "query": [
+                { "key": "n", "value": "5" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Outstanding Balance — Customer 1",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/loans/customer/{{customer1Id}}/balance",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "loans", "customer", "{{customer1Id}}", "balance"]
+            }
+          }
+        },
+        {
+          "name": "Outstanding Balance — Customer 2",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/loans/customer/{{customer2Id}}/balance",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "loans", "customer", "{{customer2Id}}", "balance"]
+            }
+          }
+        },
+        {
+          "name": "Customer Stats",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/customers/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "customers", "stats"]
+            }
+          }
+        },
+        {
+          "name": "High Exposure — More than 1 Loan",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/customers/high-exposure?minLoans=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "customers", "high-exposure"],
+              "query": [
+                { "key": "minLoans", "value": "1" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "High Exposure — More than 2 Loans",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/customers/high-exposure?minLoans=2",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "customers", "high-exposure"],
+              "query": [
+                { "key": "minLoans", "value": "2" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Customers With Overdue Loans",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/customers/overdue",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "customers", "overdue"]
+            }
+          }
+        },
+        {
+          "name": "Customer By Email",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/customers/email/john.smith@example.com",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "customers", "email", "john.smith@example.com"]
+            }
+          }
+        },
+        {
+          "name": "Active Customers",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/customers/active",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "customers", "active"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Step 7 — Update Loan Status",
+      "item": [
+        {
+          "name": "Close Loan 2",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/loans/{{loan2Id}}/status?status=CLOSED",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "loans", "{{loan2Id}}", "status"],
+              "query": [
+                { "key": "status", "value": "CLOSED" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Set Loan 5 to FORECLOSURE",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/loans/{{loan5Id}}/status?status=FORECLOSURE",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "loans", "{{loan5Id}}", "status"],
+              "query": [
+                { "key": "status", "value": "FORECLOSURE" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Verify Summary After Status Update",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/loans/summary",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "loans", "summary"]
+            }
+          }
+        },
+        {
+          "name": "Verify Active Loans After Update",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/loans/status/ACTIVE?page=0&size=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "loans", "status", "ACTIVE"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "10" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Customer 1",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Jonathan\",\n  \"lastName\": \"Smith\",\n  \"email\": \"john.smith@example.com\",\n  \"phone\": \"8005550100\",\n  \"address\": \"456 Oak Ave, New York, NY\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/customers/{{customer1Id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "customers", "{{customer1Id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Step 8 — Mark Defaulted",
+      "item": [
+        {
+          "name": "Mark Defaulted — Expect 0 Updated",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/loans/admin/mark-defaulted",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "loans", "admin", "mark-defaulted"]
+            }
+          }
+        },
+        {
+          "name": "Verify DEFAULTED Status (empty until SQL insert)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/loans/status/DEFAULTED?page=0&size=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "loans", "status", "DEFAULTED"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "10" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Error Cases",
+      "item": [
+        {
+          "name": "Duplicate Email — Expect 409",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Doe\",\n  \"email\": \"john.smith@example.com\",\n  \"phone\": \"8005550303\",\n  \"address\": \"789 Pine St\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/customers",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "customers"]
+            }
+          }
+        },
+        {
+          "name": "Invalid Customer ID — Expect 404",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/customers/non-existent-id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "customers", "non-existent-id"]
+            }
+          }
+        },
+        {
+          "name": "Loan Amount Too Small — Expect 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"loanAmount\": 50.00,\n  \"interestRate\": 6.75,\n  \"loanType\": \"FIXED\",\n  \"termMonths\": 360,\n  \"startDate\": \"2026-03-02\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/loans/customer/{{customer1Id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "loans", "customer", "{{customer1Id}}"]
+            }
+          }
+        },
+        {
+          "name": "Invalid Loan Type — Expect 500",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"loanAmount\": 300000.00,\n  \"interestRate\": 6.75,\n  \"loanType\": \"INVALID_TYPE\",\n  \"termMonths\": 360,\n  \"startDate\": \"2026-03-02\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/loans/customer/{{customer1Id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "loans", "customer", "{{customer1Id}}"]
+            }
+          }
+        },
+        {
+          "name": "Missing Required Fields — Expect 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"John\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/customers",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "customers"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

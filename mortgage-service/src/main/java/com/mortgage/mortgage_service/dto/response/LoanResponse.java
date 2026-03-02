@@ -23,6 +23,11 @@ public class LoanResponse {
     private LocalDate startDate;
     private LocalDate endDate;
     private Integer termMonths;
+
+    // Customer info — avoids a second API call just to show who owns this loan
     private String customerId;
+    private String customerName;   // firstName + lastName — populated in service layer
+
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;  // added — useful for cache invalidation & auditing
 }

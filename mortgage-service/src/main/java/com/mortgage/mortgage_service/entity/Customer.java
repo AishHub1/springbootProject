@@ -12,7 +12,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "customers")
+@Table(
+        name = "customers",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_customers_email", columnNames = "email")
+        }
+)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -56,8 +61,21 @@ public class Customer {
     private LocalDateTime updatedAt;
 
     // One customer can have many loans
-    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    // orphanRemoval = true — if a Loan is removed from this list, it's deleted from DB
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @Builder.Default
     private List<Loan> loans = new ArrayList<>();
+
+    // Keeps both sides of the bidirectional relationship in sync
+    public void addLoan(Loan loan) {
+        loans.add(loan);
+        loan.setCustomer(this);
+    }
+
+    public void removeLoan(Loan loan) {
+        loans.remove(loan);
+        loan.setCustomer(null);
+    }
 
     public enum CustomerStatus {
         ACTIVE, INACTIVE, BLACKLISTED

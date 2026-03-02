@@ -1,0 +1,19 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/mortgage_db
+    username: postgres
+    password:   # no password locally
+
+  jpa:
+    hibernate:
+      ddl-auto: update    # auto creates/alters tables in dev — never use in prod
+    show-sql: true        # prints SQL to console in dev
+
+logging:
+  level:
+    # Shows the actual SQL being executed
+    org.hibernate.SQL: DEBUG
+    # Shows the bound parameter values (e.g. WHERE customer_id = '123')
+    org.hibernate.orm.jdbc.bind: TRACE
+    # Your own application logs
+    com.mortgage: DEBUG

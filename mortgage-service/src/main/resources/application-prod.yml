@@ -1,0 +1,21 @@
+spring:
+  datasource:
+    url: ${DB_URL}              # set as environment variable — never hardcode in prod
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    hikari:
+      maximum-pool-size: 20     # max DB connections in the pool
+      minimum-idle: 5           # keep 5 connections warm at all times
+      connection-timeout: 30000 # 30s timeout before throwing an error
+      idle-timeout: 600000      # close idle connections after 10 minutes
+
+  jpa:
+    hibernate:
+      ddl-auto: validate        # NEVER auto-create in prod — use Flyway/Liquibase instead
+                                # validate checks entities match DB schema on startup
+    show-sql: false             # never log SQL in prod — performance hit + security risk
+
+logging:
+  level:
+    root: WARN                  # only warnings and errors in prod
+    com.mortgage: INFO          # keep your own app logs at INFO level
