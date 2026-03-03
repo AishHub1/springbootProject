@@ -12,6 +12,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,10 +28,12 @@ public class CustomerController {
 
     private final CustomerService customerService;
 
-    // ─── Existing Endpoints (untouched) ──────────────────────────────────────
+    // ─── ADMIN ONLY ───────────────────────────────────────────────────────────
 
-    // POST /api/v1/customers
+    // POST /api/v1/customers — only ADMIN can create customers directly
+    // (customers self-register via /auth/register)
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<CustomerResponse> createCustomer(
             @Valid @RequestBody CustomerRequest request) {
         log.info("REST request to create customer: {}", request.getEmail());
@@ -36,55 +41,14 @@ public class CustomerController {
                 .body(customerService.createCustomer(request));
     }
 
-    // GET /api/v1/customers/{customerId}
-    @GetMapping("/{customerId}")
-    public ResponseEntity<CustomerResponse> getCustomerById(
-            @PathVariable String customerId) {
-        return ResponseEntity.ok(customerService.getCustomerById(customerId));
-    }
-
-    // GET /api/v1/customers/email/{email}
-    @GetMapping("/email/{email}")
-    public ResponseEntity<CustomerResponse> getCustomerByEmail(
-            @PathVariable String email) {
-        return ResponseEntity.ok(customerService.getCustomerByEmail(email));
-    }
-
-    // GET /api/v1/customers/active
-    @GetMapping("/active")
-    public ResponseEntity<List<CustomerResponse>> getActiveCustomers() {
-        return ResponseEntity.ok(customerService.getActiveCustomers());
-    }
-
-    // PUT /api/v1/customers/{customerId}
-    @PutMapping("/{customerId}")
-    public ResponseEntity<CustomerResponse> updateCustomer(
-            @PathVariable String customerId,
-            @Valid @RequestBody CustomerRequest request) {
-        return ResponseEntity.ok(customerService.updateCustomer(customerId, request));
-    }
-
-    // DELETE /api/v1/customers/{customerId}
-    @DeleteMapping("/{customerId}")
-    public ResponseEntity<Void> deleteCustomer(@PathVariable String customerId) {
-        customerService.deleteCustomer(customerId);
-        return ResponseEntity.noContent().build();
-    }
-
-    // ─── Day 2 Additions ─────────────────────────────────────────────────────
-
-    /**
-     * GET /api/v1/customers
-     * GET /api/v1/customers?page=0&size=10&sortBy=lastName&direction=asc
-     *
-     * Replaces the old unbounded getAllCustomers() list.
-     */
+    // GET /api/v1/customers — paginated list, ADMIN only
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Page<CustomerResponse>> getAllCustomers(
-            @RequestParam(defaultValue = "0")        int page,
-            @RequestParam(defaultValue = "10")       int size,
+            @RequestParam(defaultValue = "0")         int page,
+            @RequestParam(defaultValue = "10")        int size,
             @RequestParam(defaultValue = "createdAt") String sortBy,
-            @RequestParam(defaultValue = "desc")     String direction) {
+            @RequestParam(defaultValue = "desc")      String direction) {
 
         Sort sort = direction.equalsIgnoreCase("asc")
                 ? Sort.by(sortBy).ascending()
@@ -94,14 +58,32 @@ public class CustomerController {
         return ResponseEntity.ok(customerService.getAllCustomersPaginated(pageable));
     }
 
-    /**
-     * GET /api/v1/customers/search?name=john
-     * GET /api/v1/customers/search?name=john&page=0&size=5
-     *
-     * Searches first name OR last name, case-insensitive, paginated.
-     * Replaces the old unbounded searchByName() list.
-     */
+    // GET /api/v1/customers/{customerId} — ADMIN only
+    @GetMapping("/{customerId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<CustomerResponse> getCustomerById(
+            @PathVariable String customerId) {
+        return ResponseEntity.ok(customerService.getCustomerById(customerId));
+    }
+
+    // GET /api/v1/customers/email/{email} — ADMIN only
+    @GetMapping("/email/{email}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<CustomerResponse> getCustomerByEmail(
+            @PathVariable String email) {
+        return ResponseEntity.ok(customerService.getCustomerByEmail(email));
+    }
+
+    // GET /api/v1/customers/active — ADMIN only
+    @GetMapping("/active")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<CustomerResponse>> getActiveCustomers() {
+        return ResponseEntity.ok(customerService.getActiveCustomers());
+    }
+
+    // GET /api/v1/customers/search?name=john — ADMIN only
     @GetMapping("/search")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Page<CustomerResponse>> searchByName(
             @RequestParam String name,
             @RequestParam(defaultValue = "0")  int page,
@@ -111,53 +93,58 @@ public class CustomerController {
         return ResponseEntity.ok(customerService.searchByNamePaginated(name, pageable));
     }
 
-    /**
-     * GET /api/v1/customers/{customerId}/loans
-     *
-     * Returns customer + full loan list in a single JOIN FETCH query.
-     * Use this endpoint when you need to display a customer's loans.
-     * GET /customers/{id} does NOT include loans — this one does.
-     */
-    @GetMapping("/{customerId}/loans")
-    public ResponseEntity<CustomerResponse> getCustomerWithLoans(
-            @PathVariable String customerId) {
-        return ResponseEntity.ok(customerService.getCustomerWithLoans(customerId));
-    }
-
-    /**
-     * GET /api/v1/customers/overdue
-     *
-     * Returns all customers who have at least one ACTIVE loan past its end date.
-     * Used by collections team dashboard.
-     */
+    // GET /api/v1/customers/overdue — ADMIN only (collections team)
     @GetMapping("/overdue")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<CustomerResponse>> getCustomersWithOverdueLoans() {
         return ResponseEntity.ok(customerService.getCustomersWithOverdueLoans());
     }
 
-    /**
-     * GET /api/v1/customers/high-exposure?minLoans=3
-     *
-     * Returns customers with more than N loans — risk/exposure monitoring.
-     * Default minLoans=2 if not specified.
-     */
+    // GET /api/v1/customers/high-exposure — ADMIN only (risk team)
     @GetMapping("/high-exposure")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<CustomerResponse>> getCustomersWithMoreThanNLoans(
             @RequestParam(defaultValue = "2") int minLoans) {
         return ResponseEntity.ok(customerService.getCustomersWithMoreThanNLoans(minLoans));
     }
 
-    /**
-     * GET /api/v1/customers/stats
-     *
-     * Returns dashboard metrics — currently active loan customer count.
-     * Easy to extend with more stats later.
-     */
+    // GET /api/v1/customers/stats — ADMIN only (dashboard)
     @GetMapping("/stats")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Map<String, Object>> getCustomerStats() {
         long activeCount = customerService.countCustomersWithActiveLoans();
-        return ResponseEntity.ok(Map.of(
-                "customersWithActiveLoans", activeCount
-        ));
+        return ResponseEntity.ok(Map.of("customersWithActiveLoans", activeCount));
+    }
+
+    // PUT /api/v1/customers/{customerId} — ADMIN only
+    @PutMapping("/{customerId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<CustomerResponse> updateCustomer(
+            @PathVariable String customerId,
+            @Valid @RequestBody CustomerRequest request) {
+        return ResponseEntity.ok(customerService.updateCustomer(customerId, request));
+    }
+
+    // DELETE /api/v1/customers/{customerId} — ADMIN only
+    @DeleteMapping("/{customerId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> deleteCustomer(@PathVariable String customerId) {
+        customerService.deleteCustomer(customerId);
+        return ResponseEntity.noContent().build();
+    }
+
+    // ─── CUSTOMER — OWN DATA ONLY ─────────────────────────────────────────────
+
+    // GET /api/v1/customers/{customerId}/loans
+    // ADMIN can see any customer's loans
+    // CUSTOMER can only see their OWN loans
+    // #customerId == authentication.name checks if path variable matches logged-in email
+    @GetMapping("/{customerId}/loans")
+    @PreAuthorize("hasRole('ADMIN') or #customerId == authentication.name")
+    public ResponseEntity<CustomerResponse> getCustomerWithLoans(
+            @PathVariable String customerId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        log.info("User {} requesting loans for customer {}", userDetails.getUsername(), customerId);
+        return ResponseEntity.ok(customerService.getCustomerWithLoans(customerId));
     }
 }

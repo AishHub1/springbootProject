@@ -42,6 +42,14 @@ public class Customer {
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
+    // ─── NEW: Security fields ──────────────────────────────────────────────────
+    @Column(name = "password", nullable = false)
+    private String password;   // Always stored BCrypt hashed — NEVER plain text
+
+    @Column(name = "role", nullable = false)
+    private String role = "ROLE_CUSTOMER";   // default role on registration
+    // ──────────────────────────────────────────────────────────────────────────
+
     @Column(name = "phone")
     private String phone;
 
@@ -60,13 +68,10 @@ public class Customer {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // One customer can have many loans
-    // orphanRemoval = true — if a Loan is removed from this list, it's deleted from DB
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @Builder.Default
     private List<Loan> loans = new ArrayList<>();
 
-    // Keeps both sides of the bidirectional relationship in sync
     public void addLoan(Loan loan) {
         loans.add(loan);
         loan.setCustomer(this);

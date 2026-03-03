@@ -1,34 +1,25 @@
 package com.mortgage.mortgage_service.dto.request;
 
-import jakarta.validation.constraints.*;
-import lombok.*;
+import com.mortgage.mortgage_service.entity.Payment;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import lombok.Data;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@Data
 public class PaymentRequest {
 
-    @NotBlank(message = "Loan ID is required")
-    private String loanId;
-
-    @NotNull(message = "Payment amount is required")
-    @DecimalMin(value = "0.01", message = "Payment amount must be greater than zero")
+    @NotNull(message = "Amount is required")
+    @Positive(message = "Amount must be positive")
     private BigDecimal amount;
 
-    @NotNull(message = "Due date is required")
+    private BigDecimal principalComponent;
+
+    private BigDecimal interestComponent;
+
     private LocalDate dueDate;
 
-    // Payment method — REQUIRED on submission
-    // Accepted values: ACH, WIRE, CHECK, ONLINE, AUTO_DEBIT
-    @NotBlank(message = "Payment method is required")
-    private String paymentMethod;
-
-    // Optional — bank/gateway assigns this, not always known at creation time
-    // Will be populated when Kafka payment event is received on Day 4
-    private String transactionReference;
+    private Payment.PaymentMethod paymentMethod;
 }

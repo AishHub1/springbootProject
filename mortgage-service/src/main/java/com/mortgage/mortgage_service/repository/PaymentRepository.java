@@ -17,31 +17,16 @@ import java.util.Optional;
 @Repository
 public interface PaymentRepository extends JpaRepository<Payment, String> {
 
-    // ─── Derived Queries ─────────────────────────────────────────────────────
+    // ─── Existing (untouched) ─────────────────────────────────────────────────
 
-    // All payments for a specific loan
     List<Payment> findByLoan_LoanId(String loanId);
-
-    // Paginated — use this in controllers
     Page<Payment> findByLoan_LoanId(String loanId, Pageable pageable);
-
-    // Payments by status
     List<Payment> findByStatus(Payment.PaymentStatus status);
-
     Page<Payment> findByStatus(Payment.PaymentStatus status, Pageable pageable);
-
-    // Payments due on a specific date
     List<Payment> findByDueDate(LocalDate dueDate);
-
-    // Payments due between two dates — useful for upcoming payment schedules
     List<Payment> findByDueDateBetween(LocalDate from, LocalDate to);
-
-    // Lookup by transaction reference — used when Kafka event comes back with a ref
     Optional<Payment> findByTransactionReference(String transactionReference);
 
-    // ─── JPQL Queries ────────────────────────────────────────────────────────
-
-    // All payments for a loan with their loan details loaded (avoids N+1)
     @Query("""
             SELECT p FROM Payment p
             JOIN FETCH p.loan l
@@ -49,7 +34,6 @@ public interface PaymentRepository extends JpaRepository<Payment, String> {
             """)
     Optional<Payment> findByIdWithLoan(@Param("paymentId") String paymentId);
 
-    // Total amount paid (COMPLETED only) for a given loan
     @Query("""
             SELECT SUM(p.amount) FROM Payment p
             WHERE p.loan.loanId = :loanId
@@ -57,7 +41,6 @@ public interface PaymentRepository extends JpaRepository<Payment, String> {
             """)
     BigDecimal getTotalPaidByLoan(@Param("loanId") String loanId);
 
-    // Total amount paid across all loans for a customer
     @Query("""
             SELECT SUM(p.amount) FROM Payment p
             WHERE p.loan.customer.customerId = :customerId
@@ -65,7 +48,6 @@ public interface PaymentRepository extends JpaRepository<Payment, String> {
             """)
     BigDecimal getTotalPaidByCustomer(@Param("customerId") String customerId);
 
-    // Overdue payments — DUE or PENDING payments past their due date
     @Query("""
             SELECT p FROM Payment p
             WHERE p.status IN ('DUE', 'PENDING')
@@ -73,7 +55,6 @@ public interface PaymentRepository extends JpaRepository<Payment, String> {
             """)
     List<Payment> findOverduePayments(@Param("today") LocalDate today);
 
-    // Overdue payments for a specific loan
     @Query("""
             SELECT p FROM Payment p
             WHERE p.loan.loanId = :loanId
@@ -83,15 +64,12 @@ public interface PaymentRepository extends JpaRepository<Payment, String> {
     List<Payment> findOverduePaymentsByLoan(@Param("loanId") String loanId,
                                              @Param("today") LocalDate today);
 
-    // Payment count grouped by status — for dashboard summary
     @Query("""
             SELECT p.status, COUNT(p) FROM Payment p
             GROUP BY p.status
             """)
     List<Object[]> countPaymentsByStatus();
 
-    // Monthly payment summary — total collected per month
-    // Prep for Kafka Day 4 — this same data will flow through payment events
     @Query(value = """
             SELECT
                 EXTRACT(YEAR  FROM paid_date) AS year,
@@ -106,11 +84,6 @@ public interface PaymentRepository extends JpaRepository<Payment, String> {
             """, nativeQuery = true)
     List<Object[]> getMonthlyPaymentSummary();
 
-    // ─── Bulk Updates ────────────────────────────────────────────────────────
-
-    // Mark all PENDING/DUE payments as OVERDUE if past due date
-    // Call this from a @Scheduled job daily
-    // @Transactional must be on the calling service method
     @Modifying
     @Query("""
             UPDATE Payment p SET p.status = 'OVERDUE'
@@ -118,4 +91,20 @@ public interface PaymentRepository extends JpaRepository<Payment, String> {
               AND p.dueDate < :today
             """)
     int markPaymentsAsOverdue(@Param("today") LocalDate today);
+
+    // ─── NEW: Added for PaymentServiceImpl ───────────────────────────────────
+
+    // Count by status — used in getPaymentSummary()
+    long countByStatus(Payment.PaymentStatus status);
+
+    // Payment history sorted chronologically — used in getPaymentHistory()
+    // Spring derives: WHERE loan.loanId = ? ORDER BY paidDate ASC
+    List<Payment> findByLoan_LoanIdOrderByPaidDateAsc(String loanId);
+
+    // Sum of all payments by status — used in getPaymentSummary() for totalCollected
+    @Query("""
+            SELECT SUM(p.amount) FROM Payment p
+            WHERE p.status = :status
+            """)
+    BigDecimal sumAmountByStatus(@Param("status") Payment.PaymentStatus status);
 }

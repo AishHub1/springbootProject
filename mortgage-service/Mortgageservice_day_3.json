@@ -1,0 +1,541 @@
+{
+  "info": {
+    "name": "Mortgage Service - Day 3 JWT Tests",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "adminToken",
+      "value": ""
+    },
+    {
+      "key": "customerToken",
+      "value": ""
+    },
+    {
+      "key": "customerId",
+      "value": ""
+    },
+    {
+      "key": "loanId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "1. AUTH",
+      "item": [
+        {
+          "name": "1.1 Register Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.collectionVariables.set('adminToken', json.token);",
+                  "pm.test('Status is 201', function() { pm.response.to.have.status(201); });",
+                  "pm.test('Token exists', function() { pm.expect(json.token).to.not.be.empty; });",
+                  "pm.test('Role is ROLE_CUSTOMER', function() { pm.expect(json.role).to.eql('ROLE_CUSTOMER'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/v1/auth/register",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Admin\",\n  \"lastName\": \"User\",\n  \"email\": \"admin@mortgage.com\",\n  \"password\": \"admin123\",\n  \"phone\": \"9999999999\",\n  \"address\": \"Chennai\"\n}"
+            }
+          }
+        },
+        {
+          "name": "1.2 Register Customer",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.collectionVariables.set('customerToken', json.token);",
+                  "pm.test('Status is 201', function() { pm.response.to.have.status(201); });",
+                  "pm.test('Token exists', function() { pm.expect(json.token).to.not.be.empty; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/v1/auth/register",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Customer\",\n  \"email\": \"john@customer.com\",\n  \"password\": \"customer123\",\n  \"phone\": \"8888888888\",\n  \"address\": \"Mumbai\"\n}"
+            }
+          }
+        },
+        {
+          "name": "1.3 Login Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.collectionVariables.set('adminToken', json.token);",
+                  "pm.test('Status is 200', function() { pm.response.to.have.status(200); });",
+                  "pm.test('Token exists', function() { pm.expect(json.token).to.not.be.empty; });",
+                  "pm.test('tokenType is Bearer', function() { pm.expect(json.tokenType).to.eql('Bearer'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/v1/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@mortgage.com\",\n  \"password\": \"admin123\"\n}"
+            }
+          }
+        },
+        {
+          "name": "1.4 Login Customer",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.collectionVariables.set('customerToken', json.token);",
+                  "pm.test('Status is 200', function() { pm.response.to.have.status(200); });",
+                  "pm.test('Token exists', function() { pm.expect(json.token).to.not.be.empty; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/v1/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john@customer.com\",\n  \"password\": \"customer123\"\n}"
+            }
+          }
+        },
+        {
+          "name": "1.5 Login Wrong Password (Expect 401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 401', function() { pm.response.to.have.status(401); });",
+                  "pm.test('Error is Unauthorized', function() { pm.expect(pm.response.json().error).to.eql('Unauthorized'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/v1/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@mortgage.com\",\n  \"password\": \"wrongpassword\"\n}"
+            }
+          }
+        },
+        {
+          "name": "1.6 Login Validation Error (Expect 400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 400', function() { pm.response.to.have.status(400); });",
+                  "pm.test('Validation failed', function() { pm.expect(pm.response.json().error).to.eql('Validation Failed'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/v1/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"notanemail\",\n  \"password\": \"\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. CUSTOMERS (Admin Only)",
+      "item": [
+        {
+          "name": "2.1 Get All Customers - Admin Token (Expect 200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', function() { pm.response.to.have.status(200); });",
+                  "var json = pm.response.json();",
+                  "if (json.content && json.content.length > 0) {",
+                  "  pm.collectionVariables.set('customerId', json.content[0].customerId);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": "{{baseUrl}}/api/v1/customers"
+          }
+        },
+        {
+          "name": "2.2 Get All Customers - No Token (Expect 401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 401', function() { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/customers"
+          }
+        },
+        {
+          "name": "2.3 Get All Customers - Customer Token (Expect 403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 403', function() { pm.response.to.have.status(403); });",
+                  "pm.test('Error is Forbidden', function() { pm.expect(pm.response.json().error).to.eql('Forbidden'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{customerToken}}" }],
+            "url": "{{baseUrl}}/api/v1/customers"
+          }
+        },
+        {
+          "name": "2.4 Get Customer By ID - Admin (Expect 200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', function() { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": "{{baseUrl}}/api/v1/customers/{{customerId}}"
+          }
+        },
+        {
+          "name": "2.5 Search Customers - Admin (Expect 200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', function() { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/customers/search?name=john",
+              "query": [{ "key": "name", "value": "john" }]
+            }
+          }
+        },
+        {
+          "name": "2.6 Customer Stats - Admin (Expect 200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', function() { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": "{{baseUrl}}/api/v1/customers/stats"
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. LOANS",
+      "item": [
+        {
+          "name": "3.1 Create Loan - Admin (Expect 201)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 201', function() { pm.response.to.have.status(201); });",
+                  "var json = pm.response.json();",
+                  "pm.collectionVariables.set('loanId', json.loanId);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{baseUrl}}/api/v1/loans/customer/{{customerId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"loanAmount\": 500000,\n  \"interestRate\": 8.5,\n  \"tenureMonths\": 120,\n  \"loanType\": \"HOME\"\n}"
+            }
+          }
+        },
+        {
+          "name": "3.2 Create Loan - Customer Token (Expect 403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 403', function() { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{customerToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{baseUrl}}/api/v1/loans/customer/{{customerId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"loanAmount\": 500000,\n  \"interestRate\": 8.5,\n  \"tenureMonths\": 120,\n  \"loanType\": \"HOME\"\n}"
+            }
+          }
+        },
+        {
+          "name": "3.3 Get All Loans - Admin (Expect 200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', function() { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": "{{baseUrl}}/api/v1/loans"
+          }
+        },
+        {
+          "name": "3.4 Get Loans By Customer - Customer Token (Expect 200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', function() { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{customerToken}}" }],
+            "url": "{{baseUrl}}/api/v1/loans/customer/{{customerId}}"
+          }
+        },
+        {
+          "name": "3.5 Get Loan Summary - Admin (Expect 200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', function() { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": "{{baseUrl}}/api/v1/loans/summary"
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. PAYMENTS",
+      "item": [
+        {
+          "name": "4.1 Make Payment - Customer Token (Expect 201)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 201', function() { pm.response.to.have.status(201); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{customerToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{baseUrl}}/api/v1/payments/loan/{{loanId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 5000,\n  \"principalComponent\": 3500,\n  \"interestComponent\": 1500,\n  \"paymentMethod\": \"ONLINE\"\n}"
+            }
+          }
+        },
+        {
+          "name": "4.2 Get All Payments - Admin (Expect 200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', function() { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": "{{baseUrl}}/api/v1/payments"
+          }
+        },
+        {
+          "name": "4.3 Get All Payments - Customer Token (Expect 403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 403', function() { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{customerToken}}" }],
+            "url": "{{baseUrl}}/api/v1/payments"
+          }
+        },
+        {
+          "name": "4.4 Get Payment Summary - Admin (Expect 200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', function() { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": "{{baseUrl}}/api/v1/payments/summary"
+          }
+        },
+        {
+          "name": "4.5 Get Payments By Loan - Customer Token (Expect 200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', function() { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{customerToken}}" }],
+            "url": "{{baseUrl}}/api/v1/payments/loan/{{loanId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. ACTUATOR (Public)",
+      "item": [
+        {
+          "name": "5.1 Health Check - No Token (Expect 200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', function() { pm.response.to.have.status(200); });",
+                  "pm.test('Status is UP', function() { pm.expect(pm.response.json().status).to.eql('UP'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/actuator/health"
+          }
+        }
+      ]
+    }
+  ]
+}
